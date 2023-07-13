@@ -35,6 +35,11 @@
 			<type>2</type>
 			<locationURI>PROJECT_LOC/Libraries/FreeRTOS-Kernel</locationURI>
 		</link>
+		<link>
+			<name>FreeRTOS-Plus-TCP</name>
+			<type>2</type>
+			<locationURI>PROJECT_LOC/Libraries/FreeRTOS-Plus-TCP</locationURI>
+		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
@@ -47,7 +52,25 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1689229944341</id>
+			<id>1689232803257</id>
+			<name>FreeRTOS-Plus-TCP</name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.c</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232803261</id>
+			<name>FreeRTOS-Plus-TCP</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-source</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232741849</id>
 			<name>Libraries</name>
 			<type>9</type>
 			<matcher>
@@ -56,12 +79,21 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1689229944349</id>
+			<id>1689232741853</id>
 			<name>Libraries</name>
 			<type>9</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-Config</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232741856</id>
+			<name>Libraries</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-FreeRTOS-Plus-TCP</arguments>
 			</matcher>
 		</filter>
 		<filter>
@@ -125,6 +157,42 @@
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-MemMang</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232848768</id>
+			<name>FreeRTOS-Plus-TCP/source/portable/BufferManagement</name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-BufferAllocation_2.c</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232866990</id>
+			<name>FreeRTOS-Plus-TCP/source/portable/Compiler</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-GCC</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232907601</id>
+			<name>FreeRTOS-Plus-TCP/source/portable/NetworkInterface</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-STM32Hxx</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1689232907604</id>
+			<name>FreeRTOS-Plus-TCP/source/portable/NetworkInterface</name>
+			<type>9</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-Common</arguments>
 			</matcher>
 		</filter>
 		<filter>
