@@ -21,12 +21,16 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define LED_HW			1
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -45,6 +49,22 @@ RNG_HandleTypeDef hrng;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
+
+#if LED_HW
+static void task_1_thread_fn(void *io_params) {
+	while(1) {
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+		vTaskDelay(100);
+	}
+}
+
+static void task_2_thread_fn(void *io_params) {
+	while(1) {
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+		vTaskDelay(200);
+	}
+}
+#endif
 
 /* USER CODE END PV */
 
@@ -95,6 +115,32 @@ int main(void)
   MX_USB_OTG_HS_USB_Init();
   MX_RNG_Init();
   /* USER CODE BEGIN 2 */
+
+#if LED_HW
+
+  TaskHandle_t task_1_handle, task_2_handle;
+  BaseType_t ret_status;
+
+  ret_status = xTaskCreate(task_1_thread_fn, "Task_1", 200, "HW from 1", 2, &task_1_handle);
+  configASSERT(ret_status == pdPASS);
+
+  ret_status = xTaskCreate(task_2_thread_fn, "Task_2", 200, "HW from 2", 2, &task_2_handle);
+  configASSERT(ret_status == pdPASS);
+
+  vTaskStartScheduler();
+
+#elif TCP_CLI
+
+  /* Start the TIM time Base generation in interrupt mode */
+  if(HAL_TIM_Base_Start_IT(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  extern void app_main( void );
+  app_main();
+
+#endif
 
   /* USER CODE END 2 */
 
@@ -365,6 +411,74 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/*-----------------------------------------------------------*/
+
+void vPrintStringToUart( const char *str )
+{
+    HAL_UART_Transmit( &( huart3 ), ( const uint8_t * )str, strlen( str ), 1000 );
+}
+
+/*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+    /* If configUSE_MALLOC_FAILED_HOOK is set to 1 then this function will
+     * be called automatically if a call to pvPortMalloc() fails.  pvPortMalloc()
+     * is called automatically when a task, queue or semaphore is created. */
+    for( ;; );
+}
+/*-----------------------------------------------------------*/
+
+/* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
+ * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
+ * used by the Idle task. */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+/* If the buffers to be provided to the Idle task are declared inside this
+ * function then they must be declared static - otherwise they will be allocated on
+ * the stack and so not exists after this function exits. */
+static StaticTask_t xIdleTaskTCB;
+static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Idle task's
+     * state will be stored. */
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+
+    /* Pass out the array that will be used as the Idle task's stack. */
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.
+     * Note that, as the array is necessarily of type StackType_t,
+     * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+}
+/*-----------------------------------------------------------*/
+
+/* configUSE_STATIC_ALLOCATION and configUSE_TIMERS are both set to 1, so the
+ * application must provide an implementation of vApplicationGetTimerTaskMemory()
+ * to provide the memory that is used by the Timer service task. */
+void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
+{
+/* If the buffers to be provided to the Timer task are declared inside this
+ * function then they must be declared static - otherwise they will be allocated on
+ * the stack and so not exists after this function exits. */
+static StaticTask_t xTimerTaskTCB;
+static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Timer
+     * task's state will be stored. */
+    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+
+    /* Pass out the array that will be used as the Timer task's stack. */
+    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer.
+     * Note that, as the array is necessarily of type StackType_t,
+     * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+}
+/*-----------------------------------------------------------*/
 
 /* USER CODE END 4 */
 
