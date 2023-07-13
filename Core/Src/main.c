@@ -30,7 +30,8 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define LED_HW			1
+#define LED_HW			0
+#define TCP_CLI			1
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -130,12 +131,6 @@ int main(void)
   vTaskStartScheduler();
 
 #elif TCP_CLI
-
-  /* Start the TIM time Base generation in interrupt mode */
-  if(HAL_TIM_Base_Start_IT(&htim7) != HAL_OK)
-  {
-    Error_Handler();
-  }
 
   extern void app_main( void );
   app_main();
@@ -419,15 +414,6 @@ void vPrintStringToUart( const char *str )
     HAL_UART_Transmit( &( huart3 ), ( const uint8_t * )str, strlen( str ), 1000 );
 }
 
-/*-----------------------------------------------------------*/
-
-void vApplicationMallocFailedHook( void )
-{
-    /* If configUSE_MALLOC_FAILED_HOOK is set to 1 then this function will
-     * be called automatically if a call to pvPortMalloc() fails.  pvPortMalloc()
-     * is called automatically when a task, queue or semaphore is created. */
-    for( ;; );
-}
 /*-----------------------------------------------------------*/
 
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an

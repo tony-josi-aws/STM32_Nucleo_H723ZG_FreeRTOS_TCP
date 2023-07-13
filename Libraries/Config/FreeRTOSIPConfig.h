@@ -315,7 +315,7 @@ extern void vLoggingPrintf( const char * pcFormat, ... );
 1 then FreeRTOS_debug_printf should be defined to the function used to print
 out the debugging messages. */
 #ifndef ipconfigHAS_DEBUG_PRINTF
-    #define ipconfigHAS_DEBUG_PRINTF                    1
+    #define ipconfigHAS_DEBUG_PRINTF                    0
 #endif
 
 #if( ipconfigHAS_DEBUG_PRINTF == 1 )
@@ -345,7 +345,7 @@ messages. */
 
 #define ipconfigCHECK_IP_QUEUE_SPACE                    1
 
-#define USE_IPERF                                       1
+#define USE_IPERF                                       0
 
 #define ipconfigIPERF_DOES_ECHO_UDP                     0
 
@@ -375,16 +375,6 @@ messages. */
 #define ipconfigSOCKET_HAS_USER_SEMAPHORE               1
 
 #define ipconfigTCP_MEM_STATS_MAX_ALLOCATION            64
-
-/* Trace related configs. */
-extern void pcap_capture_record_packet( const uint8_t * p_packet,
-                                        uint32_t packet_length );
-
-#define iptraceNETWORK_INTERFACE_OUTPUT( packet_length, packet ) \
-    pcap_capture_record_packet( packet, packet_length )
-
-#define iptraceNETWORK_INTERFACE_RECEIVE() \
-    pcap_capture_record_packet( pxReceivedBuffer->pucEthernetBuffer, pxReceivedBuffer->xDataLength )
 
 #ifdef __cplusplus
 } /* extern "C" */
