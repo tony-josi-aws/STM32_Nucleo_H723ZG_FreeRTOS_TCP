@@ -135,6 +135,17 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM_D1 AT> FLASH
 
+  /* Ethernet data. */
+  . = ALIGN(4);
+  .ethernet_data :
+  {
+    PROVIDE_HIDDEN (__ethernet_data_start = .);
+    KEEP (*(SORT(.ethernet_data.*)))
+    KEEP (*(.ethernet_data*))
+    PROVIDE_HIDDEN (__ethernet_data_end = .);
+  } >RAM_D1
+
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
