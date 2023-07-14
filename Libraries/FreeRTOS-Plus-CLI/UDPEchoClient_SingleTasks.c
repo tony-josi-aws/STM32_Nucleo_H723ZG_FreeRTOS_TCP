@@ -50,9 +50,9 @@
 #include "FreeRTOS_IP_Private.h"
 
 
-#define USE_ZERO_COPY               ( 1 )
+#define USE_ZERO_COPY               ( 0 )
 
-#define configECHO_SERVER_ADDR_STRING              "fe80::a53b:3371:d92f:970b"
+#define configECHO_SERVER_ADDR_STRING              "192.168.1.123"
 #define configUDP_ECHO_SERVER_PORT                  ( 7070 )
 
 /* The echo tasks create a socket, send out a number of echo requests, listen
