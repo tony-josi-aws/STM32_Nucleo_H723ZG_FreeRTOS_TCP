@@ -47,8 +47,8 @@ on).  Valid options are pdFREERTOS_BIG_ENDIAN and pdFREERTOS_LITTLE_ENDIAN. */
 #define ipconfigBYTE_ORDER pdFREERTOS_LITTLE_ENDIAN
 
 /* The checksums will be checked and calculated by the STM32F4x ETH peripheral. */
-#define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM      ( 1 )
-#define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM      ( 1 )
+#define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM      ( 0 )
+#define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM      ( 0 )
 
 /* Several API's will block until the result is known, or the action has been
 performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
@@ -62,7 +62,7 @@ used as defaults. */
 
 /* Include support for LLMNR: Link-local Multicast Name Resolution
 (non-Microsoft) */
-#define ipconfigUSE_LLMNR                           ( 1 )
+#define ipconfigUSE_LLMNR                           ( 0 )
 
 /* Include support for NBNS: NetBIOS Name Service (Microsoft) */
 #define ipconfigUSE_NBNS                            ( 0 )

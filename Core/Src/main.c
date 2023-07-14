@@ -25,6 +25,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "FreeRTOS_IP.h"
 
 /* USER CODE END Includes */
 

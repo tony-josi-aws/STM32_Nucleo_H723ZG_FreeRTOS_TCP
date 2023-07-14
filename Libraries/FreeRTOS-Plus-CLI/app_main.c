@@ -10,6 +10,7 @@
 
 /* FreeRTOS+TCP includes. */
 #include "FreeRTOS_IP.h"
+#include "FreeRTOS_ND.h"
 #include "FreeRTOS_Sockets.h"
 
 /* Logging includes. */
@@ -25,17 +26,10 @@
 /*-------------  ***  DEMO DEFINES   ***   ------------------*/
 /*-----------------------------------------------------------*/
 
-#define USE_IPv6_END_POINTS                 0
-
-#define USE_TCP_ECHO_CLIENT					1
-
-#define USE_UDP			 		     		1
-
-#define USE_TCP			 		     		0
-
-#define USE_ZERO_COPY 						1
-
-#define USE_TCP_ZERO_COPY 		     		0
+/* Set the USE_IPv6_END_POINTS macro to 1 or 0 to enable IPv6
+ * endpoints.
+ */
+#define USE_IPv6_END_POINTS                 1
 
 #if ( ipconfigUSE_IPv6 != 0 && USE_IPv6_END_POINTS != 0 && ipconfigUSE_IPv4 != 0 )
     #define TOTAL_ENDPOINTS                 3
@@ -46,15 +40,29 @@
 #endif /* ( ipconfigUSE_IPv6 != 0 && USE_IPv6_END_POINTS != 0 ) */
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
 
-static void prvSimpleServerTask( void *pvParameters );
+/* Set the following constants to 1 or 0 to define which tasks to include and
+ * exclude:
+ *
+ * mainCREATE_TCP_ECHO_TASKS_SINGLE:  When set to 1 a set of tasks are created that
+ * send TCP echo requests to the defined echo port (echoTCP_ECHO_SERVER_PORT), then wait for and
+ * verify the echo reply, from within the same task (Tx and Rx are performed in the
+ * same RTOS task).  The IP address of the echo server must be configured using the
+ * configTCP_ECHO_SERVER_ADDR macro
+ *
+ * mainCREATE_UDP_ECHO_TASKS_SINGLE:  When set to 1 a task is created that sends data
+ * to the address configECHO_SERVER_ADDR_STRING (IPv4/Ipv6) and port (configECHO_SERVER_PORT) 
+ * where it is expected to echo back the data, which, the created tasks receives.
+ *
+ */
+#define mainCREATE_TCP_ECHO_TASKS_SINGLE              1 /* 1 */
+#define mainCREATE_UDP_ECHO_TASKS_SINGLE              1
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
 
 #define SYS_LOG_PRINT_BUFFER_SIZE           256
-
-static char consolePrintBuffer[SYS_LOG_PRINT_BUFFER_SIZE];
 
 /* Logging module configuration. */
 #define mainLOGGING_TASK_STACK_SIZE         256
@@ -71,35 +79,6 @@ BaseType_t xEndPointCount = 0;
 BaseType_t xUpEndPointCount = 0;
 
 static BaseType_t xTasksAlreadyCreated = pdFALSE;
-
-static char cInputCommandString[ configMAX_COMMAND_INPUT_SIZE + 1 ];
-
-/*-----------------------------------------------------------*/
-
-
-
-#if USE_TCP
-
-    #define TCP_ECHO_RECV_DATA 0
-
-#endif /* USE_TCP */
-
-
-#if USE_UDP
-
-    #if USE_TCP
-        #define configCLI_SERVER_PORT_UDP 1235
-    #else
-        #define configCLI_SERVER_PORT_UDP configCLI_SERVER_PORT
-    #endif /* USE_TCP */
-
-#endif /* USE_UDP */
-
-static void prvConfigureMPU( void );
-
-static void prvRegisterCLICommands( void );
-
-static BaseType_t prvIsValidRequest( const uint8_t * pucPacket, uint32_t ulPacketLength, uint8_t * pucRequestId );
 
 /*-----------------------------------------------------------*/
 
@@ -158,7 +137,6 @@ void app_main( void )
                 IPv6_Address_t xIPAddress;
                 IPv6_Address_t xPrefix;
                 IPv6_Address_t xGateWay;
-                IPv6_Address_t xDNSServer1, xDNSServer2;
 
                 FreeRTOS_inet_pton6( "2001:470:ed44::", xPrefix.ucBytes );
 
@@ -250,8 +228,7 @@ void app_main( void )
     /* If the network has just come up...*/
     if( eNetworkEvent == eNetworkUp )
     {
-        uint32_t ulIPAddress, ulNetMask, ulGatewayAddress, ulDNSServerAddress;
-        char cBuffer[ 16 ];
+
 
         xUpEndPointCount += 1;
 
@@ -266,13 +243,20 @@ void app_main( void )
 
                 #if ( ipconfigUSE_IPv4 != 0 )
 
-#if USE_TCP_ECHO_CLIENT
+                    #if mainCREATE_TCP_ECHO_TASKS_SINGLE
 
-    void vStartTCPEchoClientTasks_SingleTasks( uint16_t usTaskStackSize, UBaseType_t uxTaskPriority );
-    vStartTCPEchoClientTasks_SingleTasks(mainCLI_TASK_STACK_SIZE, mainCLI_TASK_PRIORITY);
+                        void vStartTCPEchoClientTasks_SingleTasks( uint16_t usTaskStackSize, UBaseType_t uxTaskPriority );
+                        vStartTCPEchoClientTasks_SingleTasks(mainCLI_TASK_STACK_SIZE, mainCLI_TASK_PRIORITY);
 
-#endif
+                    #endif
 
+                #endif
+
+                #if ( mainCREATE_UDP_ECHO_TASKS_SINGLE == 1 )
+                    {
+                        void vStartUDPEchoClientTasks_SingleTasks(uint16_t usTaskStackSize, UBaseType_t uxTaskPriority);
+                        vStartUDPEchoClientTasks_SingleTasks( mainCLI_TASK_STACK_SIZE, mainCLI_TASK_PRIORITY );
+                    }
                 #endif
 
             }
@@ -281,9 +265,13 @@ void app_main( void )
 
         #if defined(ipconfigIPv4_BACKWARD_COMPATIBLE) && ( ipconfigIPv4_BACKWARD_COMPATIBLE == 0 )
 
+        	extern void showEndPoint( NetworkEndPoint_t * pxEndPoint );
             showEndPoint( pxEndPoint );
         
         #else
+
+            char cBuffer[ 16 ];
+            uint32_t ulIPAddress, ulNetMask, ulGatewayAddress, ulDNSServerAddress;
         
             /* Print out the network configuration, which may have come from a DHCP
             * server. */
@@ -417,7 +405,7 @@ void vApplicationMallocFailedHook( void )
 
 time_t get_time( time_t * puxTime )
 {
-    time_t val;
+    time_t val = 0;
     return val;
 }
 
