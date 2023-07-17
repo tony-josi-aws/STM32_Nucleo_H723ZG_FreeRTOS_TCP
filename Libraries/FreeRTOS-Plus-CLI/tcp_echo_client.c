@@ -89,7 +89,7 @@ static void prvEchoClientTask( void *pvParameters )
 Socket_t xSocket;
 struct freertos_sockaddr xEchoServerAddress;
 int32_t lLoopCount = 0UL;
-const int32_t lMaxLoopCount = 1;
+const int32_t lMaxLoopCount = 1000;
 volatile uint32_t ulTxCount = 0UL;
 BaseType_t xReceivedBytes, xReturned, xInstance;
 BaseType_t lTransmitted, lStringLength;
