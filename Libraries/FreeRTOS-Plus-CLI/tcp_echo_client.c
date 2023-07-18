@@ -49,7 +49,7 @@ BaseType_t x;
 }
 
 /*-----------------------------------------------------------*/
-
+#if 0
 static BaseType_t prvCreateTxData( char *cBuffer, uint32_t ulBufferLength )
 {
 BaseType_t lCharactersToAdd, lCharacter;
@@ -81,21 +81,24 @@ uint32_t ulRandomNumber;
 
 	return lCharactersToAdd;
 }
+#endif
 
 /*-----------------------------------------------------------*/
 
 static void prvEchoClientTask( void *pvParameters )
 {
-Socket_t xSocket;
-struct freertos_sockaddr xEchoServerAddress;
-int32_t lLoopCount = 0UL;
-const int32_t lMaxLoopCount = 1000;
-volatile uint32_t ulTxCount = 0UL;
-BaseType_t xReceivedBytes, xReturned, xInstance;
-BaseType_t lTransmitted, lStringLength;
-char *pcTransmittedString, *pcReceivedString;
-WinProperties_t xWinProps;
-TickType_t xTimeOnEntering;
+	Socket_t xSocket;
+	struct freertos_sockaddr xEchoServerAddress;
+	int32_t lLoopCount = 0UL;
+	const int32_t lMaxLoopCount = 1000;
+	volatile uint32_t ulTxCount = 0UL;
+	BaseType_t xReceivedBytes, xReturned, xInstance;
+	BaseType_t lTransmitted, lStringLength;
+	char *pcTransmittedString, *pcReceivedString;
+	WinProperties_t xWinProps;
+	TickType_t xTimeOnEntering;
+    BaseType_t xFamily = FREERTOS_AF_INET;
+    uint8_t ucIPType = ipTYPE_IPv4;
 
 	/* Fill in the buffer and window sizes that will be used by the socket. */
 	xWinProps.lTxBufSize = 6 * ipconfigTCP_MSS;
@@ -112,27 +115,32 @@ TickType_t xTimeOnEntering;
 	pcTransmittedString = &( cTxBuffers[ xInstance ][ 0 ] );
 	pcReceivedString = &( cRxBuffers[ xInstance ][ 0 ] );
 
-	/* Echo requests are sent to the echo server.  The address of the echo
-	server is configured by the constants configECHO_SERVER_ADDR0 to
-	configECHO_SERVER_ADDR3 in FreeRTOSConfig.h. */
-	xEchoServerAddress.sin_port = FreeRTOS_htons( echoTCP_ECHO_SERVER_PORT );
+    {
+        BaseType_t rc = FreeRTOS_inet_pton(FREERTOS_AF_INET6, configTCP_ECHO_SERVER_ADDR, (void*)xEchoServerAddress.sin_address.xIP_IPv6.ucBytes);
+        if (rc == pdPASS)
+        {
+            xFamily = FREERTOS_AF_INET6;
+            ucIPType = ipTYPE_IPv6;
+        }
+        else
+        {
+            rc = FreeRTOS_inet_pton(FREERTOS_AF_INET4, configTCP_ECHO_SERVER_ADDR, (void*) &(xEchoServerAddress.sin_address.ulIP_IPv4));
+            configASSERT(rc == pdPASS);
+            xFamily = FREERTOS_AF_INET4;
+            ucIPType = ipTYPE_IPv4;
+        }
+    }
 
-	#if defined( ipconfigIPv4_BACKWARD_COMPATIBLE ) && ( ipconfigIPv4_BACKWARD_COMPATIBLE == 0 )
-	{
-		xEchoServerAddress.sin_address.ulIP_IPv4 = FreeRTOS_inet_addr( configTCP_ECHO_SERVER_ADDR );
-	}
-	#else
-	{
-		xEchoServerAddress.sin_addr = FreeRTOS_inet_addr( configTCP_ECHO_SERVER_ADDR );
-	}
-	#endif /* defined( ipconfigIPv4_BACKWARD_COMPATIBLE ) && ( ipconfigIPv4_BACKWARD_COMPATIBLE == 0 ) */
+    xEchoServerAddress.sin_len = sizeof(xEchoServerAddress);
+    xEchoServerAddress.sin_port = FreeRTOS_htons(echoTCP_ECHO_SERVER_PORT);
+    xEchoServerAddress.sin_family = xFamily;
 
-	xEchoServerAddress.sin_family = FREERTOS_AF_INET;
+	(void) ucIPType;
 
 	for( ;; )
 	{
 		/* Create a TCP socket. */
-		xSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_STREAM, FREERTOS_IPPROTO_TCP );
+		xSocket = FreeRTOS_socket( xFamily, FREERTOS_SOCK_STREAM, FREERTOS_IPPROTO_TCP );
 		configASSERT( xSocket != FREERTOS_INVALID_SOCKET );
 
 		/* Set a time out so a missing reply does not cause the task to block
@@ -152,10 +160,8 @@ TickType_t xTimeOnEntering;
 			for( lLoopCount = 0; lLoopCount < lMaxLoopCount; lLoopCount++ )
 			{
 				/* Create the string that is sent to the echo server. */
-				//lStringLength = prvCreateTxData( pcTransmittedString, echoBUFFER_SIZES );
-
-				/* Add in some unique text at the front of the string. */
-				sprintf( pcTransmittedString, "TxRx message number %u", ulTxCount );
+				sprintf( pcTransmittedString, "TxRx message number %lu", ulTxCount );
+				lStringLength = strlen(pcTransmittedString);
 				ulTxCount++;
 
 				/* Send the string to the socket. */
