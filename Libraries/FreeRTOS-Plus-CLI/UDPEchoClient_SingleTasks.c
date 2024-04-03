@@ -52,7 +52,7 @@
 
 #define USE_ZERO_COPY               ( 0 )
 
-#define configECHO_SERVER_ADDR_STRING              "192.168.1.123"
+#define configECHO_SERVER_ADDR_STRING              "192.168.0.100"
 #define configUDP_ECHO_SERVER_PORT                  ( 7070 )
 
 /* The echo tasks create a socket, send out a number of echo requests, listen

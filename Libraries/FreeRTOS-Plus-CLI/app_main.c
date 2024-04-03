@@ -99,11 +99,10 @@ void app_main( void )
 
     configPRINTF( ( "Calling FreeRTOS_IPInit...\n" ) );
 
-	#if ( ipconfigMULTI_INTERFACE == 1 ) && ( ipconfigCOMPATIBLE_WITH_SINGLE == 0 )
-    	static NetworkInterface_t xInterfaces[1];
-    	static NetworkEndPoint_t xEndPoints[4];
-	#endif
-	memcpy(ipLOCAL_MAC_ADDRESS, ucMACAddress, sizeof ucMACAddress);
+
+  	static NetworkInterface_t xInterfaces[1];
+   	static NetworkEndPoint_t xEndPoints[4];
+	//memcpy(ipLOCAL_MAC_ADDRESS, ucMACAddress, sizeof ucMACAddress);
 
 	/* Initialize the network interface.*/
     #if defined(ipconfigIPv4_BACKWARD_COMPATIBLE) && ( ipconfigIPv4_BACKWARD_COMPATIBLE == 0 )
